@@ -49,6 +49,19 @@ router.get('/google/callback',
 );
 
 
+router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));
+
+// Callback URL for Facebook OAuth2 authentication
+router.get('/facebook/callback',
+    passport.authenticate('facebook', { session: false }),
+    function (req, res) {
+        // Authentication successful, issue a JWT and send it in the response
+        const user = req.user;
+        const token = jwt.sign(user, 'your_jwt_secret');
+        res.json({ token });
+    }
+);
+
 
 module.exports = router;
 
