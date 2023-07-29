@@ -11,7 +11,7 @@ const authMiddleware = (req, res, next) => {
 
         // If the user is not found, you can handle unauthorized access here
         if (!user) {
-            return res.status(401).json({ message: info || 'Unauthorized' });
+            return res.status(401).json({ message: info?.message || 'Unauthorized' });
         }
 
         // If the user is authenticated, store the user object in the request for further use

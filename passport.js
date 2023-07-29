@@ -72,7 +72,7 @@ passport.use(new JWTStrategy({
 
             return cb(null, userObjForReqBody);
         } else {
-            return cb(null, false, 'User not found. Your account may have been removed. Please contact the administrator.');
+            return cb(null, false, { message: 'User not found. Your account may have been removed. Please contact the administrator.' });
         }
 
     }
