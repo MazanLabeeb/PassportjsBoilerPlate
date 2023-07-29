@@ -3,7 +3,12 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const passport = require("passport");
-/* POST login. */
+
+// req.body should contain email and password defined in the LocalStrategy
+// new LocalStrategy({
+//     usernameField: 'email',
+//     passwordField: 'password'
+// }
 router.post('/login',
     function (req, res, next) {
         passport.authenticate('local', { session: false }, (err, user, info) => {
@@ -22,11 +27,29 @@ router.post('/login',
                 // generate a signed son web token with the contents of user object and return it in the response
                 const token = jwt.sign(user, 'your_jwt_secret');
                 // output is shown at end of this file
-                return res.json({ user, token });
+                return res.json({ token });
 
             });
         })(req, res);
     });
+
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+// Callback URL for Google OAuth2 authentication
+router.get('/google/callback',
+    passport.authenticate('google', { session: false }),
+    function (req, res) {
+        // Authentication successful, issue a JWT and send it in the response
+        const user = req.user;
+        const token = jwt.sign(user, 'your_jwt_secret');
+        // we should set the expiry to 1 hour
+        // const token = jwt.sign(user, 'your_jwt_secret', { expiresIn: '1h' })
+        res.json({ token });
+    }
+);
+
+
+
 module.exports = router;
 
 

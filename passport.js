@@ -4,6 +4,8 @@ const LocalStrategy = require('passport-local').Strategy;
 const passportJWT = require("passport-jwt");
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+
 
 const db = [
     {
@@ -15,6 +17,10 @@ const db = [
         github: 'https://www.github.com/MazanLabeeb',
     }
 ];
+
+// Replace with your own Google OAuth2 credentials
+const googleClientId = '997028513069-4orun09vvp6gnfegtg9ndvsl9401c4gn.apps.googleusercontent.com';
+const googleClientSecret = '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';
 
 // following code will be run when we call passport.authenticate('local', { session: false })
 // in routes\auth.js
@@ -46,6 +52,41 @@ passport.use(new LocalStrategy({
 ));
 
 
+// Configure the Google OAuth2 strategy
+passport.use(new GoogleStrategy({
+    clientID: googleClientId,
+    clientSecret: googleClientSecret,
+    callbackURL: '/auth/google/callback',
+},
+    function (accessToken, refreshToken, profile, cb) {
+        let user = db.find(user => user.email === profile?.emails[0]?.value);
+
+        //    if user is not found in db, we will create a new user
+        if (!user) {
+            let newUser = {
+                email: profile?.emails[0]?.value,
+                firstName: profile?.name?.givenName,
+                lastName: profile?.name?.familyName,
+                picture: profile?.photos[0]?.value,
+                id: profile?.id,
+            }
+
+            //  we will add the new user to the db
+            db.push(newUser);
+
+            //  we will set the user to the newUser object
+            user = newUser;
+        }
+
+        let userObjForToken = {
+            id: user.id
+        };
+
+        return cb(null, userObjForToken);
+    }
+));
+
+
 
 // after using the following passportjs middleware,we shall be able to use the :
 // "passport.authenticate('jwt', { session: false }),"
@@ -68,6 +109,8 @@ passport.use(new JWTStrategy({
                 email: getUser.email,
                 firstName: getUser.firstName,
                 lastName: getUser.lastName,
+                picture: getUser.picture,
+                
             }
 
             return cb(null, userObjForReqBody);
