@@ -72,8 +72,7 @@ passport.use(new JWTStrategy({
 
             return cb(null, userObjForReqBody);
         } else {
-            return cb(null, false);
-            // return cb(null, false, 'User not found. Your account may have been deleted. Please contact the administrator.');
+            return cb(null, false, 'User not found. Your account may have been removed. Please contact the administrator.');
         }
 
     }
